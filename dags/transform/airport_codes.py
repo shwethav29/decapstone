@@ -48,6 +48,6 @@ df_ltlg = df.withColumn("latitude",udf_parse_lat("coordinates")).withColumn("lon
 df_state = df_ltlg.withColumn("state",udf_parse_state("iso_region"))
 columns = ["ident","type","name","elevation_ft","gps_code","iata_code","local_code","latitude","longitude"]
 df_city = df_state.selectExpr("municipality as city","state").dropDuplicates()
-df_city.write.mode("overwrite").parquet(output_data + 'city/')
+df_city.write.mode("overwrite").parquet(output_data + 'data/city/')
 df_airport = df_state.select(*columns)
 df_airport.show(5)

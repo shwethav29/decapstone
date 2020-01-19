@@ -82,13 +82,13 @@ Resources:
          # Start cfn-init
          /opt/aws/bin/cfn-init -v -c install --stack ${AWS::StackId} --resource EC2Instance --region ${AWS::Region}
          # Download and unzip the Movielens dataset
-         wget http://files.grouplens.org/datasets/movielens/ml-latest.zip && unzip ml-latest.zip
+         #wget http://files.grouplens.org/datasets/movielens/ml-latest.zip && unzip ml-latest.zip
          # Upload the movielens dataset files to the S3 bucket
          #aws s3 cp ml-latest s3://${S3BucketName} --recursive
          # Install git
          sudo yum install -y git
          # Clone the git repository
-         git clone https://github.com/shwethav29/decapstone-imiigration.git
+         git clone https://github.com/shwethav29/decapstone.git
          sudo pip install boto3
          # Install airflow using pip
          echo "Install Apache Airflow"
@@ -114,11 +114,11 @@ Resources:
          sed -i '/executor = SequentialExecutor/ a executor = LocalExecutor' ~/airflow/airflow.cfg
          airflow initdb
          # Move all the files to the ~/airflow directory. The Airflow config file is setup to hold all the DAG related files in the ~/airflow/ folder.
-         mv decapstone-imiigration/* ~/airflow/
+         mv decapstone/* ~/airflow/
          # Delete the higher-level git repository directory
-         rm -rf decapstone-imiigration
+         rm -rf decapstone
          # Replace the name of the S3 bucket in each of the .scala files. CHANGE THE HIGHLIGHTED PORTION BELOW TO THE NAME OF THE S3 BUCKET YOU CREATED IN STEP 1. The below command replaces the instance of the string ‘<s3-bucket>’ in each of the scripts to the name of the actual bucket.
-         sed -i 's/<s3-bucket>/${S3BucketName}/g' /root/airflow/dags/transform/*
+         #sed -i 's/<s3-bucket>/${S3BucketName}/g' /root/airflow/dags/transform/*
          # Run Airflow webserver
          airflow webserver
     Metadata:
