@@ -1,6 +1,7 @@
 from airflow.models import BaseOperator
 import datetime
 import boto3, json
+from airflow.utils.decorators import apply_defaults
 
 class CreateEMRClusterOperator(BaseOperator):
     ui_color = '#F98866'
@@ -8,6 +9,7 @@ class CreateEMRClusterOperator(BaseOperator):
     @apply_defaults
     def __init__(self,
                  region_name,
+                 emr_connection,
                  cluster_name,
                  release_label='emr-5.9.0',
                  master_instance_type='m3.xlarge',
@@ -17,6 +19,7 @@ class CreateEMRClusterOperator(BaseOperator):
 
         super(CreateEMRClusterOperator, self).__init__(*args, **kwargs)
         self.region_name=region_name
+        self.emr_connection = emr_connection
         self.num_core_nodes=num_core_nodes
         self.cluster_name = cluster_name
         self.master_instance_type=master_instance_type
@@ -31,8 +34,8 @@ class CreateEMRClusterOperator(BaseOperator):
     def create_cluster(self):
         emr_master_security_group_id = self.get_security_group_id('AirflowEMRMasterSG', region_name=self.region_name)
         emr_slave_security_group_id = self.get_security_group_id('AirflowEMRSlaveSG', region_name=self.region_name)
-        cluster_response = CreateEMRClusterOperator.emr_connection.run_job_flow(
-            Name='Airflow-' + self.cluster_name +" - "+ str(datetime.now()),
+        cluster_response = self.emr_connection.run_job_flow(
+            Name='Airflow-' + self.cluster_name + " - " + str(datetime.now()),
             ReleaseLabel=self.release_label,
             Instances={
                 'InstanceGroups': [
