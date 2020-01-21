@@ -73,7 +73,7 @@ class CreateEMRClusterOperator(BaseOperator):
         return cluster_response['JobFlowId']
 
     def execute(self, context):
-        self.log.info(f"Creating EMR cluster cluster={self.cluster_name} at region={self.region_name} number_of_nodes={self.number_of_nodes}")
+        self.log.info(f"Creating EMR cluster cluster={self.cluster_name} at region={self.region_name} number_of_nodes={self.num_core_nodes}")
         cluster_id = self.create_cluster();
         self.log.info(f"The newly create_cluster_id = {cluster_id}")
         return cluster_id
