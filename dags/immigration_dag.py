@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
-from plugins.operators import (CreateEMRClusterOperator,ClusterCheckSensor)
+from operators import (CreateEMRClusterOperator,ClusterCheckSensor)
 import boto3
 
 region_name="us-west2"

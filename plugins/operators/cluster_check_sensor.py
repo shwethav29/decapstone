@@ -1,5 +1,6 @@
 from airflow.operators.sensors import BaseSensorOperator
-from airflow.models import Variable
+from airflow.utils.decorators import apply_defaults
+
 
 def get_cluster_status(emr, cluster_id):
     response = emr.describe_cluster(ClusterId=cluster_id)
