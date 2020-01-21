@@ -76,6 +76,6 @@ class CreateEMRClusterOperator(BaseOperator):
         self.log.info("Creating EMR cluster cluster={0} at region={1}".format(self.cluster_name,self.region_name))
         self.log.info("EMR cluster number_of_nodes={0}".format(self.num_core_nodes))
         cluster_id = self.create_cluster();
-        self.log.info(f"The newly create_cluster_id = {cluster_id}")
+        self.log.info("The newly create_cluster_id = {0}".format(cluster_id))
         return cluster_id
 
