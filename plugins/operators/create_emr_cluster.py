@@ -2,6 +2,7 @@ from airflow.models import BaseOperator
 import datetime
 import boto3
 from airflow.utils.decorators import apply_defaults
+from airflow import AirflowException
 
 class CreateEMRClusterOperator(BaseOperator):
     ui_color = '#F98866'
@@ -34,43 +35,48 @@ class CreateEMRClusterOperator(BaseOperator):
     def create_cluster(self):
         emr_master_security_group_id = self.get_security_group_id('AirflowEMRMasterSG', region_name=self.region_name)
         emr_slave_security_group_id = self.get_security_group_id('AirflowEMRSlaveSG', region_name=self.region_name)
-        cluster_response = self.emr_connection.run_job_flow(
-            Name='Airflow-' + self.cluster_name + " - " + str(datetime.now()),
-            ReleaseLabel=self.release_label,
-            Instances={
-                'InstanceGroups': [
-                    {
-                        'Name': "Master nodes",
-                        'Market': 'ON_DEMAND',
-                        'InstanceRole': 'MASTER',
-                        'InstanceType': self.master_instance_type,
-                        'InstanceCount': 1
-                    },
-                    {
-                        'Name': "Slave nodes",
-                        'Market': 'ON_DEMAND',
-                        'InstanceRole': 'CORE',
-                        'InstanceType': self.core_node_instance_type,
-                        'InstanceCount': self.num_core_nodes
-                    }
-                ],
-                'KeepJobFlowAliveWhenNoSteps': True,
-                'Ec2KeyName': 'airflow_key_pair',
-                'EmrManagedMasterSecurityGroup': emr_master_security_group_id,
-                'EmrManagedSlaveSecurityGroup': emr_slave_security_group_id
-            },
-            VisibleToAllUsers=True,
-            JobFlowRole='EmrEc2InstanceProfile',
-            ServiceRole='EmrRole',
-            Applications=[
-                {'Name': 'hadoop'},
-                {'Name': 'spark'},
-                {'Name': 'hive'},
-                {'Name': 'livy'},
-                {'Name': 'zeppelin'}
-            ]
-        )
-        return cluster_response['JobFlowId']
+        response = ""
+        try:
+            cluster_response = self.emr_connection.run_job_flow(
+                Name='Airflow-' + self.cluster_name + " - " + str(datetime.now()),
+                ReleaseLabel=self.release_label,
+                Instances={
+                    'InstanceGroups': [
+                        {
+                            'Name': "Master nodes",
+                            'Market': 'ON_DEMAND',
+                            'InstanceRole': 'MASTER',
+                            'InstanceType': self.master_instance_type,
+                            'InstanceCount': 1
+                        },
+                        {
+                            'Name': "Slave nodes",
+                            'Market': 'ON_DEMAND',
+                            'InstanceRole': 'CORE',
+                            'InstanceType': self.core_node_instance_type,
+                            'InstanceCount': self.num_core_nodes
+                        }
+                    ],
+                    'KeepJobFlowAliveWhenNoSteps': True,
+                    'Ec2KeyName': 'airflow_key_pair',
+                    'EmrManagedMasterSecurityGroup': emr_master_security_group_id,
+                    'EmrManagedSlaveSecurityGroup': emr_slave_security_group_id
+                },
+                VisibleToAllUsers=True,
+                JobFlowRole='EmrEc2InstanceProfile',
+                ServiceRole='EmrRole',
+                Applications=[
+                    {'Name': 'hadoop'},
+                    {'Name': 'spark'},
+                    {'Name': 'hive'},
+                    {'Name': 'livy'},
+                    {'Name': 'zeppelin'}
+                ]
+            )
+            response = cluster_response['JobFlowId']
+        except Exception as e:
+            raise AirflowException("Create cluster exception!")
+        return response
 
     def execute(self, context):
         self.log.info("Creating EMR cluster cluster={0} at region={1}".format(self.cluster_name,self.region_name))

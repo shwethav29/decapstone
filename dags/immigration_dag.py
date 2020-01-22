@@ -3,9 +3,16 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from operators import (CreateEMRClusterOperator,ClusterCheckSensor)
 import boto3
+from airflow import AirflowException
+import logging
 
 region_name="us-west2"
-emr_connection = boto3.client('emr', region_name=region_name)
+emr_connection=None
+try:
+    emr_connection = boto3.client('emr', region_name=region_name)
+except Exception as e:
+    logging.info(emr_connection)
+    raise AirflowException("emr_connection fail!")
 
 default_args = {
     'owner': 'decapstone-immigration',
