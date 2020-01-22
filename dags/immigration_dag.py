@@ -6,7 +6,7 @@ import boto3
 from airflow import AirflowException
 import logging
 
-region_name="us-west2"
+region_name="us-west-2"
 emr_connection=None
 try:
     emr_connection = boto3.client('emr', region_name=region_name)

@@ -33,12 +33,12 @@ class CreateEMRClusterOperator(BaseOperator):
         return response['SecurityGroups'][0]['GroupId']
 
     def create_cluster(self):
-        emr_master_security_group_id = self.get_security_group_id('AirflowEMRMasterSG', region_name=self.region_name)
-        emr_slave_security_group_id = self.get_security_group_id('AirflowEMRSlaveSG', region_name=self.region_name)
+        emr_master_security_group_id = self.get_security_group_id('AirflowEMRMasterSG')
+        emr_slave_security_group_id = self.get_security_group_id('AirflowEMRSlaveSG')
         response = ""
         try:
             cluster_response = self.emr_connection.run_job_flow(
-                Name='Airflow-' + self.cluster_name + " - " + str(datetime.now()),
+                Name='Airflow-' + self.cluster_name + "-" + str(datetime.datetime.utcnow()),
                 ReleaseLabel=self.release_label,
                 Instances={
                     'InstanceGroups': [
@@ -58,7 +58,7 @@ class CreateEMRClusterOperator(BaseOperator):
                         }
                     ],
                     'KeepJobFlowAliveWhenNoSteps': True,
-                    'Ec2KeyName': 'airflow_key_pair',
+                    'Ec2KeyName': 'spark-cluster',
                     'EmrManagedMasterSecurityGroup': emr_master_security_group_id,
                     'EmrManagedSlaveSecurityGroup': emr_slave_security_group_id
                 },
@@ -75,6 +75,7 @@ class CreateEMRClusterOperator(BaseOperator):
             )
             response = cluster_response['JobFlowId']
         except Exception as e:
+            self.logger.error("Could not create cluster",exc_info=True)
             raise AirflowException("Create cluster exception!")
         return response
 

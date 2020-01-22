@@ -17,7 +17,7 @@ class ClusterCheckSensor(BaseSensorOperator):
         ti = context['ti']
         try:
             #cluster_id = Variable.get("cluster_id")
-            task_instance = self.kwargs[self.task_id]
+            #task_instance = self.kwargs[self.task_id]
             status = get_cluster_status(self.emr, self.cluster_id)
             self.log.info(status)
             if status == 'WAITING':
