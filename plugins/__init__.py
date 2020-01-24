@@ -9,5 +9,7 @@ class DecapstonePlugin(AirflowPlugin):
     name = "decapstone_plugin"
     operators = [
         operators.CreateEMRClusterOperator,
-        operators.ClusterCheckSensor
+        operators.ClusterCheckSensor,
+        operators.TerminateEMRClusterOperator,
+        operators.SubmitSparkJobToEmrOperator
     ]

@@ -1,7 +1,7 @@
 from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
-from operators import (CreateEMRClusterOperator,ClusterCheckSensor)
+from operators import (CreateEMRClusterOperator,ClusterCheckSensor,TerminateEMRClusterOperator,SubmitSparkJobToEmrOperator)
 import boto3
 from airflow import AirflowException
 import logging
@@ -45,7 +45,7 @@ create_cluster=CreateEMRClusterOperator(
     core_node_instance_type='m3.2xlarge'
 )
 
-check_cluster= ClusterCheckSensor(
+check_cluster = ClusterCheckSensor(
     task_id="check_cluster_waiting",
     dag=dag,
     poke=60,
@@ -53,6 +53,22 @@ check_cluster= ClusterCheckSensor(
     cluster_id="{{task_instance.xcom_pull(task_ids='previous_task_id')}}"
 )
 
+terminate_cluster = TerminateEMRClusterOperator(
+    task_id="terminate_cluster",
+    dag=dag,
+    emr=emr_connection
+)
+
+transform_weather_data = SubmitSparkJobToEmrOperator(
+    task_id="transform_weather_data",
+    dag=dag,
+    emr=emr_connection,
+    file="/root/airflow/dags/transform/weather_data.py",
+    kind="spark",
+    logs=True
+)
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-start_operator >> create_cluster >> check_cluster >> end_operator
+
+start_operator >> create_cluster >> check_cluster >> transform_weather_data >> terminate_cluster >> end_operator
+

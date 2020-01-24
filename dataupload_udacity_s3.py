@@ -29,7 +29,7 @@ def uploadImmigrationDataS3():
 
 
 def uploadDemographics():
-    uploadToS3("us-cities-demographics.csv","/raw/demegraphics/us-cities-demographics.csv")
+    uploadToS3("us-cities-demographics.csv","/raw/demographics/us-cities-demographics.csv")
 
 
 def uploadGlobalTemperatures():
