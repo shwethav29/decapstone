@@ -64,7 +64,7 @@ transform_weather_data = SubmitSparkJobToEmrOperator(
     dag=dag,
     emr_connection=emr_conn,
     file="/root/airflow/dags/transform/weather_data.py",
-    kind="spark",
+    kind="pyspark",
     logs=True
 )
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
