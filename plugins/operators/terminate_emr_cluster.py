@@ -7,7 +7,6 @@ class TerminateEMRClusterOperator(BaseOperator):
 
     @apply_defaults
     def __init__(self,
-                 region_name,
                  emr_connection,
                  *args, **kwargs):
 
