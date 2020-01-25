@@ -19,7 +19,7 @@ class ClusterCheckSensor(BaseSensorOperator):
             task_instance = context['task_instance']
             clusterId = task_instance.xcom_pull('create_emr_cluster', key='cluster_id')
             self.log.info("The cluster id from create_emr_cluster {0}".format(clusterId))
-            status = get_cluster_status(self.emr, self.cluster_id)
+            status = get_cluster_status(self.emr, clusterId)
             self.log.info(status)
             if status in ['STARTING','RUNNING','BOOTSTRAPPING']:
                 return False

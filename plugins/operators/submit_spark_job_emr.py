@@ -96,7 +96,7 @@ class SubmitSparkJobToEmrOperator(BaseOperator):
         requests.delete(session_url, headers={'Content-Type': 'application/json'})
 
     def execute(self, context):
-        self.log("Submitting the spark job file = {0}".format(self.file))
+        self.log.info("Submitting the spark job file = {0}".format(self.file))
         task_instance = context['task_instance']
         clusterId = task_instance.xcom_pull('create_emr_cluster', key='cluster_id')
         cluster_dns = self.get_cluster_dns(clusterId)

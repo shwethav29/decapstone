@@ -1,5 +1,3 @@
-#Global temperatures
-from pyspark.sql.types import *
 from pyspark.sql.functions import year, month, dayofmonth
 output_data = "s3a://shwes3udacapstone/"
 df_weather = spark.read.format("csv").option("delimiter", ",").option("header", "true").load("../../data2/GlobalLandTemperaturesByCity.csv")
