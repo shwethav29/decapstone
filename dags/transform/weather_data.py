@@ -1,6 +1,9 @@
 from pyspark.sql.functions import year, month, dayofmonth
-output_data = "s3a://shwes3udacapstone/"
-df_weather = spark.read.format("csv").option("delimiter", ",").option("header", "true").load("../../data2/GlobalLandTemperaturesByCity.csv")
+import os
+s3 = "s3a://shwes3udacapstone/"
+WEATHER_DATA_PATH = "data/raw/globaltemperatures/GlobalLandTemperaturesByCity.csv"
+input_log_data_file = os.path.join(s3, LOG_DATA_PATH)
+df_weather = spark.read.format("csv").option("delimiter", ",").option("header", "true").load(input_log_data_file)
 df_weather_us = df_weather.filter("Country == 'United States'")
 df_weather_us = df_weather_us.select(df_weather_us.dt.alias("date"),
                 year("dt").alias("Year"),
