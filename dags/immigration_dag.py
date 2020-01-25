@@ -33,17 +33,17 @@ dag = DAG('immigration_dag',
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-# create_cluster=CreateEMRClusterOperator(
-#     task_id = "create_emr_cluster",
-#     dag = dag,
-#     region_name=region_name,
-#     emr_connection=emr_conn,
-#     cluster_name="immigration_cluster",
-#     release_label='emr-5.9.0',
-#     master_instance_type='m3.xlarge',
-#     num_core_nodes=2,
-#     core_node_instance_type='m3.2xlarge'
-# )
+create_cluster=CreateEMRClusterOperator(
+    task_id = "create_emr_cluster",
+    dag = dag,
+    region_name=region_name,
+    emr_connection=emr_conn,
+    cluster_name="immigration_cluster",
+    release_label='emr-5.9.0',
+    master_instance_type='m3.xlarge',
+    num_core_nodes=2,
+    core_node_instance_type='m3.2xlarge'
+)
 
 check_cluster = ClusterCheckSensor(
     task_id="check_cluster_waiting",
@@ -70,5 +70,5 @@ transform_weather_data = SubmitSparkJobToEmrOperator(
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
 
-start_operator >> check_cluster >> transform_weather_data >> terminate_cluster >> end_operator
+start_operator >> create_cluster >> check_cluster >> transform_weather_data >> terminate_cluster >> end_operator
 

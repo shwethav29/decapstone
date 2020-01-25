@@ -83,7 +83,9 @@ class CreateEMRClusterOperator(BaseOperator):
         self.log.info("Creating EMR cluster cluster={0} at region={1}".format(self.cluster_name,self.region_name))
         self.log.info("EMR cluster number_of_nodes={0}".format(self.num_core_nodes))
         task_instance = context['task_instance']
-        cluster_id = self.create_cluster();
+        #commenting out create cluster calls in testing
+        # cluster_id = self.create_cluster();
+        cluster_id = "j-2PKDSSJM7ZNSG"
         task_instance.xcom_push('cluster_id', cluster_id)
         self.log.info("The newly create_cluster_id = {0}".format(cluster_id))
         return cluster_id
