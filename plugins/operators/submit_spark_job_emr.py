@@ -92,7 +92,7 @@ class SubmitSparkJobToEmrOperator(BaseOperator):
         self.log.info('Final Statement Status: ' + final_statement_status)
         return lines
 
-    def kill_spark_session(session_url):
+    def kill_spark_session(self,session_url):
         requests.delete(session_url, headers={'Content-Type': 'application/json'})
 
     def execute(self, context):
