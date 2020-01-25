@@ -56,13 +56,13 @@ check_cluster = ClusterCheckSensor(
 terminate_cluster = TerminateEMRClusterOperator(
     task_id="terminate_cluster",
     dag=dag,
-    emr=emr_connection
+    emr_connection=emr_connection
 )
 
 transform_weather_data = SubmitSparkJobToEmrOperator(
     task_id="transform_weather_data",
     dag=dag,
-    emr=emr_connection,
+    emr_connection=emr_connection,
     file="/root/airflow/dags/transform/weather_data.py",
     kind="spark",
     logs=True
