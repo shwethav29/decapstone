@@ -12,7 +12,6 @@ class TerminateEMRClusterOperator(BaseOperator):
                  *args, **kwargs):
 
         super(TerminateEMRClusterOperator, self).__init__(*args, **kwargs)
-        self.region_name=region_name
         self.emr_connection = emr_connection
 
     def terminate_cluster(self,clusterId):
