@@ -7,11 +7,11 @@ from airflow import AirflowException
 import logging
 
 region_name="us-west-2"
-emr_connection=None
+emr_conn=None
 try:
-    emr_connection = boto3.client('emr', region_name=region_name)
+    emr_conn = boto3.client('emr', region_name=region_name)
 except Exception as e:
-    logging.info(emr_connection)
+    logging.info(emr_conn)
     raise AirflowException("emr_connection fail!")
 
 default_args = {
@@ -37,7 +37,7 @@ create_cluster=CreateEMRClusterOperator(
     task_id = "create_emr_cluster",
     dag = dag,
     region_name=region_name,
-    emr_connection=emr_connection,
+    emr_connection=emr_conn,
     cluster_name="immigration_cluster",
     release_label='emr-5.9.0',
     master_instance_type='m3.xlarge',
@@ -49,20 +49,20 @@ check_cluster = ClusterCheckSensor(
     task_id="check_cluster_waiting",
     dag=dag,
     poke=60,
-    emr=emr_connection,
+    emr=emr_conn,
     cluster_id="{{task_instance.xcom_pull(task_ids='previous_task_id')}}"
 )
 
 terminate_cluster = TerminateEMRClusterOperator(
     task_id="terminate_cluster",
     dag=dag,
-    emr_connection=emr_connection
+    emr_connection=emr_conn
 )
 
 transform_weather_data = SubmitSparkJobToEmrOperator(
     task_id="transform_weather_data",
     dag=dag,
-    emr_connection=emr_connection,
+    emr_connection=emr_conn,
     file="/root/airflow/dags/transform/weather_data.py",
     kind="spark",
     logs=True
