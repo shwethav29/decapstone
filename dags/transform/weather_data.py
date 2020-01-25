@@ -2,7 +2,7 @@ from pyspark.sql.functions import year, month, dayofmonth
 import os
 s3 = "s3a://shwes3udacapstone/"
 WEATHER_DATA_PATH = "data/raw/globaltemperatures/GlobalLandTemperaturesByCity.csv"
-input_log_data_file = os.path.join(s3, LOG_DATA_PATH)
+input_log_data_file = os.path.join(s3, WEATHER_DATA_PATH)
 df_weather = spark.read.format("csv").option("delimiter", ",").option("header", "true").load(input_log_data_file)
 df_weather_us = df_weather.filter("Country == 'United States'")
 df_weather_us = df_weather_us.select(df_weather_us.dt.alias("date"),
@@ -14,4 +14,4 @@ df_weather_us = df_weather_us.select(df_weather_us.dt.alias("date"),
                 df_weather_us.City,
                 df_weather_us.Latitude,
                 df_weather_us.Longitude)
-df_weather_us.partitionBy("City,Month,DayOfMonth").mode("overwrite").parquet(output_data + 'data/processed/weather/')
+df_weather_us.partitionBy("City,Month,DayOfMonth").mode("overwrite").parquet(s3 + 'data/processed/weather/')
