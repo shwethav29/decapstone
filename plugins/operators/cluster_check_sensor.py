@@ -8,9 +8,8 @@ def get_cluster_status(emr, cluster_id):
 
 class ClusterCheckSensor(BaseSensorOperator):
     @apply_defaults
-    def __init__(self,emr,cluster_id, *args, **kwargs):
+    def __init__(self,emr, *args, **kwargs):
         self.emr = emr
-        self.cluster_id = cluster_id
         return super(ClusterCheckSensor, self).__init__(*args, **kwargs)
 
     def poke(self, context):

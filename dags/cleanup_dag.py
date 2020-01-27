@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-from operators import (CreateEMRClusterOperator,ClusterCheckSensor)
+from operators import (TerminateEMRClusterOperator)
 import boto3
 from airflow import AirflowException
 import logging
@@ -26,43 +26,27 @@ default_args = {
     'provide_context': True
 }
 #Initializing the Dag, create EMR cluster and then wait for the ETL dag to complete
-dag = DAG('cluster_dag',
+dag = DAG('cleanup_dag',
           default_args=default_args,
           concurrency=3,
           schedule_interval=None,
-          description='Create EMR cluster, wait for ETL to complete immigration transformation. Terminate cluster',
+          description='Terminates the cluster',
         )
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-create_cluster=CreateEMRClusterOperator(
-    task_id = "create_emr_cluster",
-    dag = dag,
-    region_name=region_name,
-    emr_connection=emr_conn,
-    cluster_name="immigration_cluster",
-    release_label='emr-5.9.0',
-    master_instance_type='m3.xlarge',
-    num_core_nodes=2,
-    core_node_instance_type='m3.2xlarge'
-)
+# check_cluster = ExternalTaskSensor(task_id='check_cluster_available',
+#                                    external_dag_id = 'cluster_dag',
+#                                    external_task_id='check_cluster_waiting',
+#                                    dag=dag,
+#                                    mode='reschedule')
 
-check_cluster = ClusterCheckSensor(
-    task_id="check_cluster_waiting",
+terminate_cluster = TerminateEMRClusterOperator(
+    task_id="terminate_cluster",
     dag=dag,
-    poke=60,
-    emr=emr_conn,
+    emr_connection=emr_conn
 )
-
-
-check_etl_complete = ExternalTaskSensor(task_id='check_etl_dag_sensor',
-                                        external_dag_id = 'immigration_etl_dag',
-                                        external_task_id = None,
-                                        dag=dag)
-
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-
-start_operator >> create_cluster >> check_cluster >> check_etl_complete  >> end_operator
-
+start_operator >> terminate_cluster >> end_operator

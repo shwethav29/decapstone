@@ -42,8 +42,13 @@ def uploadGlobalTemperatures():
 def uploadAirportCode():
     uploadToS3("airport-codes_csv.csv", "/raw/airportcode/airport-codes_csv.csv")
 
+def uploadCodes():
+    uploadToS3("i94addrl.txt", "/raw/codes/i94addrl.txt")
+    uploadToS3("i94cntyl.txt", "/raw/codes/i94cntyl.txt")
+    uploadToS3("i94prtl.txt", "/raw/codes/i94prtl.txt")
 
 uploadImmigrationDataS3()
 uploadDemographics()
 uploadGlobalTemperatures()
 uploadAirportCode()
+uploadCodes()
