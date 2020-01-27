@@ -1,6 +1,6 @@
 from airflow.operators.sensors import BaseSensorOperator
 from airflow.utils.decorators import apply_defaults
-
+from airflow.models import Variable
 
 def get_cluster_status(emr, cluster_id):
     response = emr.describe_cluster(ClusterId=cluster_id)
@@ -17,7 +17,8 @@ class ClusterCheckSensor(BaseSensorOperator):
         ti = context['ti']
         try:
             task_instance = context['task_instance']
-            clusterId = task_instance.xcom_pull('create_emr_cluster', key='cluster_id')
+            #clusterId = task_instance.xcom_pull('create_emr_cluster', key='cluster_id')
+            clusterId = Variable.get("cluster_id")
             self.log.info("The cluster id from create_emr_cluster {0}".format(clusterId))
             status = get_cluster_status(self.emr, clusterId)
             self.log.info(status)

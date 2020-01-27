@@ -6,6 +6,7 @@ import json
 import time
 from airflow.utils.decorators import apply_defaults
 from airflow import AirflowException
+from airflow.models import Variable
 
 class SubmitSparkJobToEmrOperator(BaseOperator):
     ui_color = '#F98866'
@@ -98,7 +99,8 @@ class SubmitSparkJobToEmrOperator(BaseOperator):
     def execute(self, context):
         self.log.info("Submitting the spark job file = {0}".format(self.file))
         task_instance = context['task_instance']
-        clusterId = task_instance.xcom_pull('create_emr_cluster', key='cluster_id')
+        #clusterId = task_instance.xcom_pull('create_emr_cluster', key='cluster_id')
+        clusterId = Variable.get("cluster_id")
         cluster_dns = self.get_cluster_dns(clusterId)
         headers = self.create_spark_session(cluster_dns)
         session_url = self.wait_for_idle_session(cluster_dns,headers)
