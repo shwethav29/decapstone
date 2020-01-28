@@ -1,30 +1,11 @@
-import configparser
-from datetime import datetime
+from pyspark.sql.functions import year, month, dayofmonth
 import os
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import udf, col
-from pyspark.sql.functions import year, month, dayofmonth, hour, weekofyear, date_format, dayofweek
-from pyspark.sql import types as T
+s3 = "s3a://shwes3udacapstone/"
+DEMOGRAPHICS_DATA_PATH = "data/raw/demographics/us-cities-demographics.csv"
+input_log_data_file = os.path.join(s3, DEMOGRAPHICS_DATA_PATH)
 
-config = configparser.ConfigParser()
-config.read('dl.cfg')
-
-os.environ['AWS_ACCESS_KEY_ID'] = config.get('AWS', 'AWS_ACCESS_KEY_ID')
-os.environ['AWS_SECRET_ACCESS_KEY'] = config.get('AWS', 'AWS_SECRET_ACCESS_KEY')
-
-def create_spark_session():
-    spark = SparkSession \
-        .builder \
-        .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.5") \
-        .getOrCreate()
-    return spark
-
-
-# Read in the data here
-
-spark = SparkSession.builder\
-                     .config("spark.jars.packages","org.apache.hadoop:hadoop-aws:2.7.0")\
-                     .getOrCreate()
-df = spark.read.format("csv").option("delimiter", ";").option("header", "true").load("./us-cities-demographics.csv")
-df.printSchema()
-df.show(5)
+df_demo = spark.read.format("csv").option("delimiter", ";").option("header", "true").load(input_log_data_file)
+df_demo = df_demo.withColumnRenamed("State Code","state_code")
+df_state = spark.read.parquet(s3+"data/processed/codes/us_state")
+df_demo = df_demo.join(df_state,"state_code")
+df_demo.write.mode("overwrite").parquet(s3 + 'data/processed/city/')

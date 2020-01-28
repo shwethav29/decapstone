@@ -5,15 +5,6 @@ import pandas as pd
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import MapType, DoubleType, StringType
-config = configparser.ConfigParser()
-config.read('./dl.cfg')
-
-os.environ['AWS_ACCESS_KEY_ID'] = config.get('AWS', 'AWS_ACCESS_KEY_ID')
-os.environ['AWS_SECRET_ACCESS_KEY'] = config.get('AWS', 'AWS_SECRET_ACCESS_KEY')
-
-spark = SparkSession.builder\
-                     .config("spark.jars.packages","org.apache.hadoop:hadoop-aws:2.7.0")\
-                     .getOrCreate()
 
 output_data = "s3a://shwes3udacapstone/"
 
@@ -40,14 +31,16 @@ def parse_state(iso_region):
     return state
 udf_parse_state = udf(lambda x:parse_state(x),StringType())
 
-df = spark.read.format("csv").option("header", "true").load("./airport-codes_csv.csv")
-df = df.filter("iso_country='US' and type!='closed' and iata_code!='null'")
-#df.select("type").distinct().show()
-#df.select("iata_code").distinct().show()
-df_ltlg = df.withColumn("latitude",udf_parse_lat("coordinates")).withColumn("longitude",udf_parse_log("coordinates"))
-df_state = df_ltlg.withColumn("state",udf_parse_state("iso_region"))
-columns = ["ident","type","name","elevation_ft","gps_code","iata_code","local_code","latitude","longitude"]
-df_city = df_state.selectExpr("municipality as city","state").dropDuplicates()
-df_city.write.mode("overwrite").parquet(output_data + 'data/city/')
-df_airport = df_state.select(*columns)
-df_airport.show(5)
+s3 = "s3a://shwes3udacapstone/"
+AIRPORT_DATA_PATH = "data/raw/airportcode/airport-codes_csv.csv"
+input_log_data_file = os.path.join(s3, AIRPORT_DATA_PATH)
+df_airport = spark.read.format("csv").option("header", "true").load(input_log_data_file)
+df_airport = df_airport.filter("iso_country='US' and type!='closed' and iata_code!='null'")
+df_airport = df_airport.withColumn("latitude",udf_parse_lat("coordinates")).withColumn("longitude",udf_parse_log("coordinates"))
+df_airport = df_airport.withColumn("state",udf_parse_state("iso_region"))
+df_airport = df_airport.withColumnRenamed("municipality","city").withColumnRenamed("iata_code","airport_code")
+columns = ["ident","type","name","city","gps_code","airport_code","local_code","latitude","longitude"]
+df_airports = df_airport.select(*columns)
+df_us_ports = spark.read.parquet(s3+"data/processed/codes/us_ports")
+df_immigration_airport = df_airport.join(df_us_ports,df_airport.airport_code==df_us_ports.port_code)
+df_immigration_airport.write.mode("overwrite").parquet(output_data + 'data/processed/airports/')

@@ -46,16 +46,16 @@ def process_airport_codes():
     split_col = F.split(df_airport._c1, ",")
     df_airport = df_airport.withColumn("city", split_col.getItem(0))
     df_airport = df_airport.withColumn("state_code", split_col.getItem(1))
-    df_airport = df_airport.withColumnRenamed("_c0", "airport_code")
+    df_airport = df_airport.withColumnRenamed("_c0", "port_code")
     df_airport = df_airport.drop("_c1")
-    df_airport = df_airport.withColumn("airport_code",
-                                       F.regexp_replace(df_airport.airport_code, "[^A-Z]", "")).withColumn("city",
+    df_airport = df_airport.withColumn("port_code",
+                                       F.regexp_replace(df_airport.port_code, "[^A-Z]", "")).withColumn("city",
                                                                                                            F.ltrim(
                                                                                                                F.rtrim(
                                                                                                                    df_airport.city))).withColumn(
         "state_code", F.regexp_replace(df_airport.state_code, "[^A-Z]", ""))
     df_state = process_state_codes()
-    df_airport = df_airport.join(df_state, df_airport.state_code == df_state.state_code)
+    df_airport = df_airport.join(df_state, "state_code")
     df_airport.write.mode("overwrite").parquet(s3 + 'data/processed/codes/us_ports')
 
 process_airport_codes()
