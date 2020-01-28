@@ -35,7 +35,11 @@ dag = DAG('immigration_etl_dag',
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-check_cluster = ExternalTaskSensor(task_id='check_cluster_ready_dag_sensor', external_dag_id = 'cluster_dag', external_task_id = 'check_cluster_waiting', dag=dag, mode = 'reschedule')
+check_cluster = ExternalTaskSensor(task_id='check_cluster_ready_dag_sensor',
+                                   external_dag_id = 'cluster_dag',
+                                   external_task_id = 'check_cluster_waiting',
+                                   dag=dag,
+                                   execution_delta=timedelta(minutes=-30))
 
 transform_weather_data = SubmitSparkJobToEmrOperator(
     task_id="transform_weather_data",
