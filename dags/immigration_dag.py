@@ -79,7 +79,5 @@ transform_demographics = SubmitSparkJobToEmrOperator(
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-
-start_operator >>  check_cluster >> transform_weather_data >> transform_i94codes_data >> end_operator
 start_operator >>  check_cluster >> transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> end_operator
 
