@@ -1,8 +1,4 @@
-# Do all imports and installs here
-import configparser
 import os
-import pandas as pd
-from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import MapType, DoubleType, StringType
 
@@ -26,7 +22,7 @@ def parse_state(iso_region):
     state = None
     if(iso_region is not None):
         l = iso_region
-        l=iso_region.strip().split("-",1)
+        l = iso_region.strip().split("-",1)
         state = l[1]
     return state
 udf_parse_state = udf(lambda x:parse_state(x),StringType())
@@ -39,7 +35,7 @@ df_airport = df_airport.filter("iso_country='US' and type!='closed' and iata_cod
 df_airport = df_airport.withColumn("latitude",udf_parse_lat("coordinates")).withColumn("longitude",udf_parse_log("coordinates"))
 df_airport = df_airport.withColumn("state",udf_parse_state("iso_region"))
 df_airport = df_airport.withColumnRenamed("municipality","city").withColumnRenamed("iata_code","airport_code")
-columns = ["ident","type","name","city","gps_code","airport_code","local_code","latitude","longitude"]
+columns = ["ident","type","name","gps_code","airport_code","local_code","latitude","longitude"]
 df_airports = df_airport.select(*columns)
 df_us_ports = spark.read.parquet(s3+"data/processed/codes/us_ports")
 df_immigration_airport = df_airport.join(df_us_ports,df_airport.airport_code==df_us_ports.port_code)
