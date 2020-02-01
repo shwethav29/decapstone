@@ -14,4 +14,4 @@ df_weather_us = df_weather_us.select(df_weather_us.dt.alias("date"),
                 df_weather_us.City,
                 df_weather_us.Latitude,
                 df_weather_us.Longitude)
-df_weather_us.repartition("Month","City").write.partitionBy("Month","City").mode("overwrite").parquet(s3 + 'data/processed/weather/')
+df_weather_us.repartition("Month").write.partitionBy("Month").mode("overwrite").parquet(s3 + 'data/processed/weather/')

@@ -36,7 +36,7 @@ df_airport = df_airport.withColumn("latitude",udf_parse_lat("coordinates")).with
 df_airport = df_airport.withColumn("state",udf_parse_state("iso_region"))
 df_airport = df_airport.withColumnRenamed("municipality","city").withColumnRenamed("iata_code","airport_code")
 columns = ["ident","type","name","gps_code","airport_code","local_code","latitude","longitude"]
-df_airports = df_airport.select(*columns)
+df_airport = df_airport.select(*columns)
 df_us_ports = spark.read.parquet(s3+"data/processed/codes/us_ports")
 df_immigration_airport = df_airport.join(df_us_ports,df_airport.airport_code==df_us_ports.port_code)
 df_immigration_airport.write.mode("overwrite").parquet(output_data + 'data/processed/airports/')
