@@ -47,7 +47,7 @@ def trigger_imigration_dag_with_context(context,dag_run_obj):
 
 trigger_dag = TriggerDagRunOperator(
     task_id = "trigger_immigration_dag",
-    trigger_dag = "immigration_etl_dag",
+    trigger_dag_id = "immigration_etl_dag",
     python_callable=trigger_imigration_dag_with_context,
     dag= dag,
     provide_context=True
