@@ -7,6 +7,8 @@ I94_CODES_DATA_PATH = "data/raw/codes/"
 AIRPORT_FILE="i94prtl.txt"
 COUNTRY_FILE="i94cntyl.txt"
 STATE_FILE="i94addrl.txt"
+MODELFILE = "i94model.txt"
+VISAFILE = "i94visa.txt"
 
 # process and clean data from i94 label description file
 def process_state_codes():
@@ -58,7 +60,30 @@ def process_airport_codes():
     df_airport = df_airport.join(df_state, "state_code")
     df_airport.write.mode("overwrite").parquet(s3 + 'data/processed/codes/us_ports')
 
+def process_i94Model_codes():
+    input_data_file = os.path.join(s3, I94_CODES_DATA_PATH + MODELFILE)
+    df_i94mode = spark.read.format("csv").option("delimiter", "=").option("header", "False").load(input_data_file)
+
+    df_i94mode = df_i94mode.withColumn("_c0", F.regexp_replace(df_i94mode._c0, "'", "")). \
+        withColumn("_c1", F.regexp_replace(df_i94mode._c1, "[^A-Za-z]", ""))
+    df_i94mode = df_i94mode.withColumnRenamed("_c0", "i94mode").withColumnRenamed("_c1", "mode")
+    df_i94mode.write.mode("overwrite").parquet(s3+"data/processed/codes/i94mode")
+
+
+def process_i94Visa_codes():
+    input_data_file = os.path.join(s3, I94_CODES_DATA_PATH + VISAFILE)
+    df_i94visa = spark.read.format("csv").option("delimiter", "=").option("header", "False").load(input_data_file)
+
+    df_i94visa = df_i94visa.withColumn("_c0", F.regexp_replace(df_i94visa._c0, "'", "")). \
+        withColumn("_c1", F.regexp_replace(df_i94visa._c1, "[^A-Za-z0-9]", ""))
+    df_i94visa = df_i94visa.withColumnRenamed("_c0", "i94visa").withColumnRenamed("_c1", "visa")
+    df_i94visa.write.mode("overwrite").parquet(s3+"data/processed/codes/i94visa")
+
+
 process_airport_codes()
 process_country_codes()
+process_i94Model_codes()
+process_i94Visa_codes()
+
 
 

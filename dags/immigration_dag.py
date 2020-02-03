@@ -76,7 +76,16 @@ transform_demographics = SubmitSparkJobToEmrOperator(
     logs=True
 )
 
+transform_immigration_data = SubmitSparkJobToEmrOperator(
+    task_id="transform_immigration",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/immigration_data.py",
+    kind="pyspark",
+    logs=True
+)
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-start_operator >>  check_cluster >> transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> end_operator
+start_operator >>  check_cluster >> transform_i94codes_data
+transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> transform_immigration_data >> end_operator
 
