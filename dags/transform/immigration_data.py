@@ -1,6 +1,6 @@
 import datetime as dt
 import pyspark.sql.functions as F
-
+import os
 s3 = "s3a://shwes3udacapstone/"
 I94_CODES_DATA_PATH = "data/raw/codes/"
 AIRPORT_FILE="i94prtl.txt"
@@ -9,7 +9,10 @@ STATE_FILE="i94addrl.txt"
 
 udf_parse_arrival_dt = F.udf(lambda x: (dt.datetime(1960, 1, 1).date() + dt.timedelta(x)).isoformat() if x else None)
 
-df_spark =spark.read.format('com.github.saurfang.sas.spark').load('../../data/18-83510-I94-Data-2016/i94_apr16_sub.sas7bdat')
+IMMIGRATION_DATA = "data/raw/i94_immigration_data/18-83510-I94-Data-2016/i94_apr16_sub.sas7bdat"
+input_log_data_file = os.path.join(s3, IMMIGRATION_DATA)
+
+df_spark =spark.read.format('com.github.saurfang.sas.spark').load(input_log_data_file)
 df_spark = df_spark.withColumn("arrdate",udf_parse_arrival_dt(df_spark.arrdate))
 df_spark = df_spark.withColumn("depdate",udf_parse_arrival_dt(df_spark.depdate))
 
