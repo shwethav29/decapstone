@@ -38,7 +38,8 @@ start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 check_cluster = ExternalTaskSensor(task_id='check_cluster_ready_dag_sensor',
                                    external_dag_id = 'cluster_dag',
                                    external_task_id = 'check_cluster_waiting',
-                                   dag=dag)
+                                   dag=dag,
+                                   execution_delta=datetime.timedelta(minutes=5))
 
 transform_weather_data = SubmitSparkJobToEmrOperator(
     task_id="transform_weather_data",
