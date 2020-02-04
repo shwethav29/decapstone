@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-from operators import (SubmitSparkJobToEmrOperator)
+from operators import (SubmitSparkJobToEmrOperator,ClusterCheckSensor)
 import boto3
 from airflow import AirflowException
 import logging
@@ -35,11 +35,12 @@ dag = DAG('immigration_etl_dag',
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-check_cluster = ExternalTaskSensor(task_id='check_cluster_ready_dag_sensor',
-                                   external_dag_id = 'cluster_dag',
-                                   external_task_id = 'check_cluster_waiting',
-                                   dag=dag,
-                                   execution_delta=datetime.timedelta(minutes=5))
+check_cluster = ClusterCheckSensor(
+    task_id="check_cluster_waiting",
+    dag=dag,
+    poke=60,
+    emr=emr_conn,
+)
 
 transform_weather_data = SubmitSparkJobToEmrOperator(
     task_id="transform_weather_data",
@@ -87,6 +88,6 @@ transform_immigration_data = SubmitSparkJobToEmrOperator(
 )
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-start_operator >>  check_cluster >> transform_i94codes_data
+start_operator >> check_cluster >> transform_i94codes_data
 transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> transform_immigration_data >> end_operator
 

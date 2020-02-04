@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-from operators import (CreateEMRClusterOperator,ClusterCheckSensor)
+from operators import (CreateEMRClusterOperator,ClusterCheckSensor,CustomExternalTaskSensor)
 import boto3
 from airflow import AirflowException
 import logging
@@ -55,10 +55,12 @@ check_cluster = ClusterCheckSensor(
 )
 
 
-check_etl_complete = ExternalTaskSensor(task_id='check_etl_dag_sensor',
+check_etl_complete = CustomExternalTaskSensor(task_id='check_etl_dag_sensor',
                                         external_dag_id = 'immigration_etl_dag',
                                         external_task_id = None,
-                                        dag=dag)
+                                        dag=dag,
+                                        execution_delta=timedelta(hours=-5)
+)
 
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)

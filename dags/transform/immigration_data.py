@@ -44,9 +44,9 @@ df_immigrant = df_spark.selectExpr('cast(cicid as int) cicid', 'age', 'occup','b
 'residence_country','gender','visapost','visa','visatype')
 df_immigrant = df_spark.selectExpr('cast(cicid as int) cicid', 'cast(age as int) age', 'occup','cast(biryear as int) birth_year','birth_country',\
 'residence_country','gender','visapost','visa','visatype').withColumn("i94dt",F.lit(year_month))
-df_immigrant.repartition("i94dt").write.partitionBy("i94dt").mode("overwrite").parquet(s3 + 'data/processed/immigrant/')
+df_immigrant.repartition("i94dt","visa").write.partitionBy("i94dt","visa").mode("overwrite").parquet(s3 + 'data/processed/immigrant/')
 
 df_immigration = df_spark.selectExpr('cast(cicid as int) cicid', 'cast(year as int) year','cast(month as int) month','port_of_entry','arrival_date',\
                                      'departure_date','dtadfile','entdepa','entdepd','entdepu','matflag','dtaddto',\
-                                     'insnum','airline','admnum','cast(admnum as long) admnuml','fltno','state_code','state_name')
-df_immigration.repartition("i94dt").write.partitionBy("i94dt").mode("overwrite").parquet(s3 + 'data/processed/immigrantion/')
+                                     'insnum','airline','admnum','cast(admnum as long) admnuml','fltno','state_code','state_name').withColumn("i94dt",F.lit(year_month))
+df_immigration.repartition("i94dt","state_code").write.partitionBy("i94dt","state_code").mode("overwrite").parquet(s3 + 'data/processed/immigrantion/')
