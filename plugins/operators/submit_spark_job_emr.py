@@ -107,10 +107,10 @@ class SubmitSparkJobToEmrOperator(BaseOperator):
         execution_date = context.get("execution_date")
         month = execution_date.strftime("%m")
         year = execution_date.strftime("%Y")
-        file_month_year = execution_date.strftime("%b")+execution_date.strftime("%y")
+        file_month_year = execution_date.strftime("%b").lower()+execution_date.strftime("%y")
         self.log.info("Execution date of the task submit spark job is {0}".format(execution_date))
         self.log.info("Execution year and month of submit spark job is  {0}".format(year+month))
-        statement_response = self.submit_statement(session_url,self.file,"year_month={0} \n file_month_year={1} \n".format(year+month,file_month_year))
+        statement_response = self.submit_statement(session_url,self.file,"year_month='{0}' \nfile_month_year='{1}' \n".format(year+month,file_month_year))
         logs = self.track_statement_progress(cluster_dns,statement_response.headers)
         self.kill_spark_session(session_url)
         for line in logs:
