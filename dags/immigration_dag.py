@@ -18,12 +18,11 @@ except Exception as e:
 
 default_args = {
     'owner': 'decapstone-immigration',
-    'start_date': datetime(2016,1,1),
-    'end_date':datetime(2016,4,1),
+    'start_date': datetime(2016,1,1,0,0,0,0),
+    'end_date':datetime(2016,4,1,0,0,0,0),
     'depends_on_past':False,
     'retries':1,
     'retry_delay':timedelta(minutes=5),
-    'schedule_interval': '@monthly',
     'email_on_retry':False,
     'provide_context': True
 }
@@ -33,8 +32,9 @@ dag = DAG('immigration_etl_dag',
           concurrency=3,
           catchup=True,
           description='Load and transform data for immigration project',
-          max_active_runs=1
-        )
+          max_active_runs=1,
+          schedule_interval="@monthly"
+)
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
