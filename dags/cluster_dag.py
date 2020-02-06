@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-from operators import (CreateEMRClusterOperator,ClusterCheckSensor,CustomExternalTaskSensor)
+from operators import (CreateEMRClusterOperator,ClusterCheckSensor,CustomExternalTaskSensor,SubmitSparkJobToEmrOperator)
 import boto3
 from airflow import AirflowException
 import logging
@@ -54,6 +54,42 @@ check_cluster = ClusterCheckSensor(
     emr=emr_conn,
 )
 
+transform_weather_data = SubmitSparkJobToEmrOperator(
+    task_id="transform_weather_data",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/weather_data.py",
+    kind="pyspark",
+    logs=True
+)
+
+transform_i94codes_data = SubmitSparkJobToEmrOperator(
+    task_id="transform_i94codes_data",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/i94_data_dictionary.py",
+    kind="pyspark",
+    logs=True
+)
+
+transform_airport_code = SubmitSparkJobToEmrOperator(
+    task_id="transform_airport_code",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/airport_codes.py",
+    kind="pyspark",
+    logs=True
+)
+
+transform_demographics = SubmitSparkJobToEmrOperator(
+    task_id="transform_demographics",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/demographics.py",
+    kind="pyspark",
+    logs=True
+)
+
 
 check_etl_complete = CustomExternalTaskSensor(task_id='check_etl_dag_sensor',
                                         external_dag_id = 'immigration_etl_dag',
@@ -66,5 +102,6 @@ check_etl_complete = CustomExternalTaskSensor(task_id='check_etl_dag_sensor',
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
 
-start_operator >> create_cluster >> check_cluster >> check_etl_complete  >> end_operator
+start_operator >> create_cluster >> check_cluster >> transform_i94codes_data
+transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> end_operator
 
