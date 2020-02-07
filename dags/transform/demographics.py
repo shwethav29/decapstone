@@ -1,4 +1,3 @@
-from pyspark.sql.functions import year, month, dayofmonth
 import os
 from pyspark.sql.functions import udf, regexp_replace
 from pyspark.sql.types import StringType
@@ -15,5 +14,5 @@ df_demo = df_demo.withColumnRenamed("State Code","state_code").withColumnRenamed
 df_demo = df_demo.select("city","state_code","median_age","population")
 df_state = spark.read.parquet(s3+"data/processed/codes/us_state")
 df_demo = df_demo.join(df_state,["state_code"])
-df_demo = df_demo.withColumn("city",regexp_replace(udf_capitalize_lower("city"),"\t",""))
+#df_demo = df_demo.withColumn("city",regexp_replace(udf_capitalize_lower("city"),"\t",""))
 df_demo.write.mode("overwrite").parquet(s3 + 'data/processed/city/')

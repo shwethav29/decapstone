@@ -102,6 +102,7 @@ Resources:
          sudo pip install markupsafe
          sudo pip install --upgrade MarkupSafe
          sudo pip install --upgrade Flask
+         sudo pip install werkzeug==0.16.0
          echo 'export PATH=/usr/local/bin:$PATH' >> /root/.bash_profile
          source /root/.bash_profile
          # Initialize Airflow

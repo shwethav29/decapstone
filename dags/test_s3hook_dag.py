@@ -16,8 +16,7 @@ default_args = {
     'depends_on_past':False,
     'retries':1,
     'retry_delay':timedelta(minutes=5),
-    'email_on_retry':False,
-    'provide_context': True
+    'email_on_retry':False
 }
 #Initializing the Dag, to transform the data from the S3 using spark and create normalized datasets
 dag = DAG('test_s3_hook',
@@ -42,8 +41,8 @@ test_s3_hook = PythonOperator(
     task_id="s3_hook_list",
     python_callable=check_s3_list_key,
     op_kwargs={
-        'keys':['data/processed/weather/',"data/processed/airports/","data/processed/city/","data/processed/immigration/","data/processed/immigrant/"],
-        'bucket':"shwes3udacapstone",
+        'keys':['/data/processed/weather/',"/data/processed/airports/","/data/processed/city/","/data/processed/immigration/","/data/processed/immigrant/"],
+        'bucket':"shwes3udacapstone"
     },
     dag=dag
 )

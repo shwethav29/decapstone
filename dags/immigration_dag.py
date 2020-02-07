@@ -44,6 +44,42 @@ check_cluster = ClusterCheckSensor(
     poke=60,
     emr=emr_conn,
 )
+transform_weather_data = SubmitSparkJobToEmrOperator(
+    task_id="transform_weather_data",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/weather_data.py",
+    kind="pyspark",
+    logs=True
+)
+
+transform_i94codes_data = SubmitSparkJobToEmrOperator(
+    task_id="transform_i94codes_data",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/i94_data_dictionary.py",
+    kind="pyspark",
+    logs=True
+)
+
+transform_airport_code = SubmitSparkJobToEmrOperator(
+    task_id="transform_airport_code",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/airport_codes.py",
+    kind="pyspark",
+    logs=True
+)
+
+transform_demographics = SubmitSparkJobToEmrOperator(
+    task_id="transform_demographics",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/demographics.py",
+    kind="pyspark",
+    logs=True
+)
+
 
 transform_immigration_data = SubmitSparkJobToEmrOperator(
     task_id="transform_immigration",
@@ -74,4 +110,5 @@ transform_immigration_city = SubmitSparkJobToEmrOperator(
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-start_operator >> check_cluster >> transform_immigration_data >> transform_immigration_city >> end_operator
+start_operator >> check_cluster >> transform_i94codes_data
+transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> transform_immigration_data >> transform_immigration_city >> end_operator
