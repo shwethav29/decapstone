@@ -1,6 +1,6 @@
 import os
-from pyspark.sql.functions import udf
-from pyspark.sql.types import MapType, DoubleType, StringType
+from pyspark.sql.functions import udf, regexp_replace
+from pyspark.sql.types import DoubleType, StringType
 
 output_data = "s3a://shwes3udacapstone/"
 
@@ -26,6 +26,7 @@ def parse_state(iso_region):
         state = l[1]
     return state
 udf_parse_state = udf(lambda x:parse_state(x),StringType())
+udf_capitalize_lower = udf(lambda x:str(x).lower().capitalize(),StringType())
 
 s3 = "s3a://shwes3udacapstone/"
 AIRPORT_DATA_PATH = "data/raw/airportcode/airport-codes_csv.csv"
@@ -37,6 +38,7 @@ df_airport = df_airport.withColumn("state",udf_parse_state("iso_region"))
 df_airport = df_airport.withColumnRenamed("municipality","city").withColumnRenamed("iata_code","airport_code")
 columns = ["ident","type","name","gps_code","airport_code","local_code","latitude","longitude"]
 df_airport = df_airport.select(*columns)
-df_us_ports = spark.read.parquet(s3+"data/processed/codes/us_ports")
-df_immigration_airport = df_airport.join(df_us_ports,df_airport.airport_code==df_us_ports.port_code)
+df_us_ports = spark.read.parquet(s3+"data/processed/codes/us_ports").withColumnRenamed("port_code","airport_code")
+df_immigration_airport = df_airport.join(df_us_ports,["airport_code"])
+df_immigration_airport = df_immigration_airport.withColumn("city",udf_capitalize_lower(regexp_replace(df_immigration_airport.city,"\t","")))
 df_immigration_airport.write.mode("overwrite").parquet(output_data + 'data/processed/airports/')

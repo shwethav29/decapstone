@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-from operators import (CreateEMRClusterOperator,ClusterCheckSensor,CustomExternalTaskSensor,SubmitSparkJobToEmrOperator)
+from operators import (CreateEMRClusterOperator,ClusterCheckSensor,SubmitSparkJobToEmrOperator)
 import boto3
 from airflow import AirflowException
 import logging
@@ -89,15 +89,6 @@ transform_demographics = SubmitSparkJobToEmrOperator(
     kind="pyspark",
     logs=True
 )
-
-
-check_etl_complete = CustomExternalTaskSensor(task_id='check_etl_dag_sensor',
-                                        external_dag_id = 'immigration_etl_dag',
-                                        external_task_id = None,
-                                        dag=dag,
-                                        execution_delta=timedelta(hours=-5)
-)
-
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 

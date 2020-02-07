@@ -14,7 +14,7 @@ mylogger = Logger.getLogger("DAG")
 
 
 def check(path, table):
-    df = spark.read.parquet(path).filter("i94_dt = '{}'".format(year_month))
+    df = spark.read.parquet(path).filter("i94dt = '{}'".format(year_month))
     if len(df.columns) > 0 and df.count() > 0:
         mylogger.warn("{} SUCCESS".format(table))
     else:
@@ -22,6 +22,6 @@ def check(path, table):
 
 
 
-check(s3+IMMIGRATION)
-check(s3+IMMIGRANT)
-check(s3+IMMIGRANT_CITY)
+check(s3+IMMIGRATION,"immigration")
+check(s3+IMMIGRANT,"immigrant")
+check(s3+IMMIGRANT_CITY,"immigration_demo_weather")

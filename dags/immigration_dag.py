@@ -53,7 +53,7 @@ transform_immigration_data = SubmitSparkJobToEmrOperator(
     kind="pyspark",
     logs=True
 )
-transform_immig_demo_weather_data = SubmitSparkJobToEmrOperator(
+transform_immigration_city = SubmitSparkJobToEmrOperator(
     task_id="transform_immigration_city",
     dag=dag,
     emr_connection=emr_conn,
@@ -62,16 +62,16 @@ transform_immig_demo_weather_data = SubmitSparkJobToEmrOperator(
     logs=True
 )
 
-run_quality_checks = SubmitSparkJobToEmrOperator(
-    task_id="run_quality_checks",
-    dag=dag,
-    emr_connection=emr_conn,
-    file="/root/airflow/dags/transform/check_data_quality.py",
-    kind="pyspark",
-    logs=True
-)
+# run_quality_checks = SubmitSparkJobToEmrOperator(
+#     task_id="run_quality_checks",
+#     dag=dag,
+#     emr_connection=emr_conn,
+#     file="/root/airflow/dags/transform/check_data_quality.py",
+#     kind="pyspark",
+#     logs=True
+# )
 
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-start_operator >> check_cluster >> transform_immigration_data >> transform_immig_demo_weather_data >> run_quality_checks >> end_operator
+start_operator >> check_cluster >> transform_immigration_data >> transform_immigration_city >> end_operator

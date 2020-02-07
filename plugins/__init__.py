@@ -11,6 +11,5 @@ class DecapstonePlugin(AirflowPlugin):
         operators.CreateEMRClusterOperator,
         operators.ClusterCheckSensor,
         operators.TerminateEMRClusterOperator,
-        operators.SubmitSparkJobToEmrOperator,
-        operators.CustomExternalTaskSensor
-    ]
+        operators.SubmitSparkJobToEmrOperator
+]
