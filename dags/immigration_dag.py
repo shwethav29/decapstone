@@ -4,12 +4,18 @@ from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
 from operators import (SubmitSparkJobToEmrOperator,ClusterCheckSensor)
+from airflow.operators.python_operator import PythonOperator
+
 import boto3
 from airflow import AirflowException
 import logging
 
 region_name="us-west-2"
+
 emr_conn=None
+
+s3 = boto3.resource('s3')
+
 try:
     emr_conn = boto3.client('emr', region_name=region_name)
 except Exception as e:
@@ -98,17 +104,38 @@ transform_immigration_city = SubmitSparkJobToEmrOperator(
     logs=True
 )
 
-# run_quality_checks = SubmitSparkJobToEmrOperator(
-#     task_id="run_quality_checks",
-#     dag=dag,
-#     emr_connection=emr_conn,
-#     file="/root/airflow/dags/transform/check_data_quality.py",
-#     kind="pyspark",
-#     logs=True
-# )
+run_quality_checks = SubmitSparkJobToEmrOperator(
+    task_id="run_quality_checks",
+    dag=dag,
+    emr_connection=emr_conn,
+    file="/root/airflow/dags/transform/check_data_quality.py",
+    kind="pyspark",
+    logs=True
+)
 
+def check_s3_list_key(keys,bucket):
+    capstone_bucket = s3.Bucket(bucket)
+
+    for key in keys:
+        objs = list(capstone_bucket.objects.filter(Prefix=key+"_SUCCESS"))
+        print(objs)
+        print(objs[0])
+        if len(objs) == 0:
+            raise ValueError("key {0} does not exist".format(key))
+
+
+test_s3_hook = PythonOperator(
+    task_id="s3_hook_list",
+    python_callable=check_s3_list_key,
+    op_kwargs={
+        'keys':["data/processed/weather/","data/processed/airports/","data/processed/city/","data/processed/immigration/","data/processed/immigrant/"],
+        'bucket':"shwes3udacapstone"
+    },
+    dag=dag
+)
 
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
 start_operator >> check_cluster >> transform_i94codes_data
-transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> transform_immigration_data >> transform_immigration_city >> end_operator
+transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> transform_immigration_data
+transform_immigration_data >> transform_immigration_city >> run_quality_checks >> test_s3_hook >> end_operator

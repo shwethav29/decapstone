@@ -2,7 +2,6 @@ from airflow import DAG
 from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.operators.python_operator import PythonOperator
-from airflow.hooks import S3_hook
 
 import boto3
 from airflow import AirflowException

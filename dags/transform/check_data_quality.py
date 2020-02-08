@@ -1,7 +1,3 @@
-from pyspark.sql.functions import col
-import pyspark.sql.functions as F
-from pyspark.sql.types import *
-from pyspark.sql.functions import udf
 s3 = "s3a://shwes3udacapstone/"
 IMMIGRATION="data/processed/immigration/"
 IMMIGRANT="data/processed/immigrant/"
@@ -18,7 +14,7 @@ def check(path, table):
     if len(df.columns) > 0 and df.count() > 0:
         mylogger.warn("{} SUCCESS".format(table))
     else:
-        mylogger.warn("{} FAIL".format(table))
+        raise ValueError("Data quality checks failed")
 
 
 

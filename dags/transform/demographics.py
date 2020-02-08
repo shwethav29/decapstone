@@ -1,5 +1,5 @@
 import os
-from pyspark.sql.functions import udf, regexp_replace
+from pyspark.sql.functions import udf, trim
 from pyspark.sql.types import StringType
 
 
@@ -13,5 +13,5 @@ df_demo = df_demo.withColumnRenamed("State Code","state_code").withColumnRenamed
 df_demo = df_demo.select("city","state_code","median_age","population")
 df_state = spark.read.parquet(s3+"data/processed/codes/us_state")
 df_demo = df_demo.join(df_state,["state_code"])
-#df_demo = df_demo.withColumn("city",udf_capitalize_lower(regexp_replace(df_demo.city,"\t","")))
+df_demo = df_demo.withColumn("city",udf_capitalize_lower(trim(df_demo.city)))
 df_demo.write.mode("overwrite").parquet(s3 + 'data/processed/city/')
