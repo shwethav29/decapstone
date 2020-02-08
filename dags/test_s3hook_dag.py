@@ -9,7 +9,7 @@ from airflow import AirflowException
 import logging
 
 region_name="us-west-2"
-
+s3 = boto3.client('s3')
 default_args = {
     'owner': 'decapstone-immigration',
     'start_date': datetime(2018,1,1),
@@ -31,18 +31,21 @@ dag = DAG('test_s3_hook',
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
 def check_s3_list_key(keys,bucket):
-    hook = S3_hook.S3Hook("my_s3_conn")
+    s3.Bucket(bucket)
     for key in keys:
-        data_found = hook.check_for_key(key, bucket)
-        if(not data_found):
-            raise ValueError("Could not find s3 key {}".format(key))
+        result = s3.list_objects(Bucket=bucket, Prefix=key)
+        if result:
+            print(result)
+        else:
+            raise ValueError("key not found {0}".format(key))
+
 
 test_s3_hook = PythonOperator(
     task_id="s3_hook_list",
     python_callable=check_s3_list_key,
     op_kwargs={
         'keys':['/data/processed/weather/',"/data/processed/airports/","/data/processed/city/","/data/processed/immigration/","/data/processed/immigrant/"],
-        'bucket':"shwes3udacapstone"
+        'bucket':"shwes3udacapstone/"
     },
     dag=dag
 )
