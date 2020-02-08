@@ -34,13 +34,12 @@ def check_s3_list_key(keys,bucket):
     capstone_bucket = s3.Bucket(bucket)
 
     for key in keys:
-        objs = list(capstone_bucket.objects.filter(Prefix=key))
+        objs = list(capstone_bucket.objects.filter(Prefix=key+"_SUCCESS"))
         print(objs)
         print(objs[0])
-        if len(objs) > 0 and objs[0]==key:
-            return True
-        else:
+        if len(objs) == 0:
             raise ValueError("key {0} does not exist".format(key))
+
 
 test_s3_hook = PythonOperator(
     task_id="s3_hook_list",
