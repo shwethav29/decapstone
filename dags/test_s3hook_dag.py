@@ -9,7 +9,7 @@ from airflow import AirflowException
 import logging
 
 region_name="us-west-2"
-s3 = boto3.client('s3')
+s3 = boto3.resource('s3')
 default_args = {
     'owner': 'decapstone-immigration',
     'start_date': datetime(2018,1,1),
@@ -31,21 +31,23 @@ dag = DAG('test_s3_hook',
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
 def check_s3_list_key(keys,bucket):
-    s3.Bucket(bucket)
-    for key in keys:
-        result = s3.list_objects(Bucket=bucket, Prefix=key)
-        if result:
-            print(result)
-        else:
-            raise ValueError("key not found {0}".format(key))
+    capstone_bucket = s3.Bucket(bucket)
 
+    for key in keys:
+        objs = list(capstone_bucket.objects.filter(Prefix=key))
+        print(objs)
+        print(objs[0])
+        if len(objs) > 0 and objs[0]==key:
+            return True
+        else:
+            raise ValueError("key {0} does not exist".format(key))
 
 test_s3_hook = PythonOperator(
     task_id="s3_hook_list",
     python_callable=check_s3_list_key,
     op_kwargs={
-        'keys':['/data/processed/weather/',"/data/processed/airports/","/data/processed/city/","/data/processed/immigration/","/data/processed/immigrant/"],
-        'bucket':"shwes3udacapstone/"
+        'keys':["data/processed/weather/","data/processed/airports/","data/processed/city/","data/processed/immigration/","data/processed/immigrant/"],
+        'bucket':"shwes3udacapstone"
     },
     dag=dag
 )
