@@ -84,12 +84,12 @@ in this data set is from 1882-2013. Unfortunately Udacity provided immigration d
 joined the immigration cities with weather. But there is a scope to do it in future.
   
 ### Data Model
-We will be extracting the data the table as show ing the picture below.
+We will be extracting the data the table as shown in the picture below.
 ![data model](imgs/data_model.png)
 
 
 As you can see from the above image. we have created 11 table. 
-The following table are from the data dictionary file that has the codes.
+The following table are from the data dictionary files that has the codes.
 The immigration and immigrant table refer to these tables, for codes.
 - i94mode
 - i94visa
@@ -98,11 +98,11 @@ The immigration and immigrant table refer to these tables, for codes.
 - country
 
 Other normalized tables are
-- immigration
-- immigrant
-- airports
-- weather
-- city
+- immigration - this is created from the immigration data. Partitioned by year and month.
+- immigrant - the immigration data is transformed to the immigrant data. Partitioned by year and month.
+- airports - the airports data comes from the airport code that is joined with the us_port codes from data dictionary. 
+- weather - The weather data comed from the global temperature data. This is partitioned by the month of the reading.
+- city - This data comes by transforming the data from USA demographics.
 
 Finally we have created immigration_demographics:
 This table shows the immigrants by age, visatype which cities they come to and the median age and population of the city.
@@ -117,6 +117,8 @@ Below image show the workflow steps executed by airflow.
 ### Data Quality
 At the end of the transformation of data. We will use a s3 operator to check the processed data that was created after the transformation logic on the raw data.
 This is shown as the data quality check operator in the above shown pipeline.
+There is also a run_data_quality task that checks if the immigration, immigrant tables has data in it for the month and year of the run.
+
 
 ### Steps to execute this project
 
@@ -125,5 +127,37 @@ This is shown as the data quality check operator in the above shown pipeline.
 - Log into the EC2 instance and start the airflow scheduler.
 - Open airflow ui interface and turn on the cluster_dag. This job is scheduled to run once a month.
 - Once airflow workflow is complete. The data lake is available on the S3 bucket.
+
+### Other Scenarios
+
+#### The data was increased by 100x:
+The number of nodes in the EMR can be increased by changing the parameters in the DAG task creation.
+Also we might need to revisit the partition logic. 
+We can use Amazon Redshift a fast cloud data warehouse tool that can be easily integrated with our existing Amazon EMR and spark.
+Redshift can be scaled to work with petabytes of data. 
+
+#### The pipelines would be run on a daily basis by 7 am every day.
+Since we are already using the Apache Airflow changing the scheduling is just modifying the scheduler from monthy to daily at 7 am
+
+#### The database needed to be accessed by 100+ people.
+We can use Amazon Redshift that can scale very well and also is the fastest cloud data warehouse.
+It is column oriented database and is MPP(massively parallel processing). Optimized for reads.
+
+### Defending Decision
+The choice of the data model, wanted to create a data model that can achieve the purpose at hand with the scope of expansion.
+Hence I have used all the data sets that were provided. We can further increase the scope of the immigration and the effects of weather.
+Since the provided data did not have the weather data for the immigration year. I decided not to explore this view of data.
+Instead this project I have focused on Where part of immigration. Where are the particular visa holder are coming from and where do they land.
+Hence this project focus on immigration and USA demographics.
+
+I decided to explore the data lakes using the AWS EMR. Using S3 for storage and spark for processing.
+To manage the workflow I decided to go with Apache airflow due to the ease of setup and the powerful user interface it comes with.
+Also it is pretty easy to extend using python programming. The project heavily uses the Airflow operators and
+uses Apache Livy to submit the spark jobs to EMR using the REST calls. With Airflow workflow management we start with creating a EMR cluster,
+waiting for the cluster, performing the transformations, checking the data quality,
+terminating the cluster.ß
+
+Finally creating the stack on AWS with all the installations and configuration is done using the AMS
+cloudformation. Its easy to use and in few steps you have entire set up up and running in no time. 
 
 

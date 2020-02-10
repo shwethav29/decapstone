@@ -43,7 +43,7 @@ create_cluster=CreateEMRClusterOperator(
     cluster_name="immigration_cluster",
     release_label='emr-5.9.0',
     master_instance_type='m3.xlarge',
-    num_core_nodes=2,
+    num_core_nodes=3,
     core_node_instance_type='m3.2xlarge'
 )
 
