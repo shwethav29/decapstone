@@ -158,6 +158,6 @@ waiting for the cluster, performing the transformations, checking the data quali
 terminating the cluster.ß
 
 Finally creating the stack on AWS with all the installations and configuration is done using the AMS
-cloudformation. Its easy to use and in few steps you have entire set up up and running in no time. 
+cloud formation. Its easy to use and in few steps you have entire set up and running in no time. 
 
 

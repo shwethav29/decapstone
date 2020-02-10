@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from airflow.operators.dummy_operator import DummyOperator
 from airflow.sensors.external_task_sensor import ExternalTaskSensor
 
-from operators import (SubmitSparkJobToEmrOperator,ClusterCheckSensor)
+from operators import (SubmitSparkJobToEmrOperator,ClusterCheckSensor,CreateEMRClusterOperator,TerminateEMRClusterOperator)
 from airflow.operators.python_operator import PythonOperator
 
 import boto3
@@ -44,12 +44,25 @@ dag = DAG('immigration_etl_dag',
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
+create_cluster=CreateEMRClusterOperator(
+    task_id = "create_emr_cluster",
+    dag = dag,
+    region_name=region_name,
+    emr_connection=emr_conn,
+    cluster_name="immigration_cluster",
+    release_label='emr-5.9.0',
+    master_instance_type='m3.xlarge',
+    num_core_nodes=3,
+    core_node_instance_type='m3.2xlarge'
+)
+
 check_cluster = ClusterCheckSensor(
     task_id="check_cluster_waiting",
     dag=dag,
     poke=60,
     emr=emr_conn,
 )
+
 transform_weather_data = SubmitSparkJobToEmrOperator(
     task_id="transform_weather_data",
     dag=dag,
@@ -134,8 +147,14 @@ test_s3_hook = PythonOperator(
     dag=dag
 )
 
+terminate_cluster = TerminateEMRClusterOperator(
+    task_id="terminate_cluster",
+    dag=dag,
+    emr_connection=emr_conn
+)
+
 end_operator = DummyOperator(task_id='End_execution',  dag=dag)
 
-start_operator >> check_cluster >> transform_i94codes_data
+start_operator >> create_cluster >> check_cluster >> transform_i94codes_data
 transform_i94codes_data >> [transform_weather_data,transform_airport_code, transform_demographics] >> transform_immigration_data
-transform_immigration_data >> transform_immigration_city >> run_quality_checks >> test_s3_hook >> end_operator
+transform_immigration_data >> transform_immigration_city >> run_quality_checks >> test_s3_hook >> terminate_cluster >> end_operator
