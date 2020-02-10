@@ -20,4 +20,4 @@ def check(path, table):
 
 check(s3+IMMIGRATION,"immigration")
 check(s3+IMMIGRANT,"immigrant")
-check(s3+IMMIGRANT_CITY,"immigration_demographics")
+#check(s3+IMMIGRANT_CITY,"immigration_demographics")

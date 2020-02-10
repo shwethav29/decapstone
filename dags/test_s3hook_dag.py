@@ -29,7 +29,7 @@ dag = DAG('test_s3_hook',
 
 start_operator = DummyOperator(task_id='Begin_execution',  dag=dag)
 
-def check_s3_list_key(keys,bucket):
+def check_s3_list_key(keys,bucket,**kwargs):
     capstone_bucket = s3.Bucket(bucket)
 
     for key in keys:
@@ -43,6 +43,7 @@ def check_s3_list_key(keys,bucket):
 test_s3_hook = PythonOperator(
     task_id="s3_hook_list",
     python_callable=check_s3_list_key,
+    provide_context=True,
     op_kwargs={
         'keys':["data/processed/weather/","data/processed/airports/","data/processed/city/","data/processed/immigration/","data/processed/immigrant/"],
         'bucket':"shwes3udacapstone"

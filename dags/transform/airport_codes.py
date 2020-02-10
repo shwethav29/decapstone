@@ -1,5 +1,5 @@
 import os
-from pyspark.sql.functions import udf, regexp_replace
+from pyspark.sql.functions import udf, regexp_replace,lower
 from pyspark.sql.types import DoubleType, StringType
 
 output_data = "s3a://shwes3udacapstone/"
@@ -40,5 +40,5 @@ columns = ["ident","type","name","gps_code","airport_code","local_code","latitud
 df_airport = df_airport.select(*columns)
 df_us_ports = spark.read.parquet(s3+"data/processed/codes/us_ports").withColumnRenamed("port_code","airport_code")
 df_immigration_airport = df_airport.join(df_us_ports,["airport_code"])
-df_immigration_airport = df_immigration_airport.withColumn("city",udf_capitalize_lower(regexp_replace(df_immigration_airport.city,"\t","")))
+df_immigration_airport = df_immigration_airport.withColumn("city",lower(regexp_replace(df_immigration_airport.city,"\t","")))
 df_immigration_airport.write.mode("overwrite").parquet(output_data + 'data/processed/airports/')

@@ -126,7 +126,7 @@ run_quality_checks = SubmitSparkJobToEmrOperator(
     logs=True
 )
 
-def check_s3_list_key(keys,bucket):
+def check_s3_list_key(keys,bucket,**kwargs):
     capstone_bucket = s3.Bucket(bucket)
 
     for key in keys:
@@ -140,6 +140,7 @@ def check_s3_list_key(keys,bucket):
 test_s3_hook = PythonOperator(
     task_id="s3_hook_list",
     python_callable=check_s3_list_key,
+    provide_context=True,
     op_kwargs={
         'keys':["data/processed/weather/","data/processed/airports/","data/processed/city/","data/processed/immigration/","data/processed/immigrant/"],
         'bucket':"shwes3udacapstone"
@@ -150,6 +151,7 @@ test_s3_hook = PythonOperator(
 terminate_cluster = TerminateEMRClusterOperator(
     task_id="terminate_cluster",
     dag=dag,
+    trigger_rule="all_done",
     emr_connection=emr_conn
 )
 

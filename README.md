@@ -113,6 +113,7 @@ Apache airflow will use the REST API -Apache Livy to submit the spark data trans
 
 Below image show the workflow steps executed by airflow.
 
+![data pipiline](imgs/airflow_workflow_graph_view.png)
 
 ### Data Quality
 At the end of the transformation of data. We will use a s3 operator to check the processed data that was created after the transformation logic on the raw data.
@@ -158,6 +159,6 @@ waiting for the cluster, performing the transformations, checking the data quali
 terminating the cluster.ß
 
 Finally creating the stack on AWS with all the installations and configuration is done using the AMS
-cloud formation. Its easy to use and in few steps you have entire set up and running in no time. 
+cloud formation. Its easy to use and in few steps you have entire set up and running. 
 
 
