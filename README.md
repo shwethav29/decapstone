@@ -19,7 +19,8 @@ To achieve this we will use AWS EMR, Apache airflow, Apache Livy and Pyspark.
 ## AWS setup
 For AWS cloud set up we are going to use cloud formation script. 
 The script will create a stack depicted in the picture below. 
-This consists ofthe EC2 instance, S3, IAM roles and the DBinstance for airflow
+This consists ofthe EC2 instance, S3, IAM roles and the DBinstance for airflow.
+For more details on how to create a cloudformation script refer to [this](https://aws.amazon.com/blogs/big-data/build-a-concurrent-data-orchestration-pipeline-using-amazon-emr-and-apache-livy/) link.
 
 ![aws stack](imgs/template1-designer.png)
 
