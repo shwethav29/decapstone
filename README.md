@@ -83,15 +83,47 @@ We will be interested in the weather data of only USA. The weather data that was
 in this data set is from 1882-2013. Unfortunately Udacity provided immigration data was for 2016, hence I have not
 joined the immigration cities with weather. But there is a scope to do it in future.
   
-###Data Model
-We will be extracting the data to the star schema with facts and dimentions.
+### Data Model
+We will be extracting the data the table as show ing the picture below.
+![data model](imgs/data_model.png)
 
+
+As you can see from the above image. we have created 11 table. 
+The following table are from the data dictionary file that has the codes.
+The immigration and immigrant table refer to these tables, for codes.
+- i94mode
+- i94visa
+- us_ports
+- us_state
+- country
+
+Other normalized tables are
+- immigration
+- immigrant
+- airports
+- weather
+- city
+
+Finally we have created immigration_demographics:
+This table shows the immigrants by age, visatype which cities they come to and the median age and population of the city.
+
+### Mapping out Data Pipeline
+See the data pipeline we have modeled to perform the ETL steps using apache airflow.
+Apache airflow will use the REST API -Apache Livy to submit the spark data transformation scripts to the EMR.
+
+Below image show the workflow steps executed by airflow.
+
+
+### Data Quality
+At the end of the transformation of data. We will use a s3 operator to check the processed data that was created after the transformation logic on the raw data.
+This is shown as the data quality check operator in the above shown pipeline.
 
 ### Steps to execute this project
 
 - The stack is created on AWS using the cloud formation script.
 - The immigration data provided by the Udacity is uploaded to the S3 using the script dataupload_udacity_s3.py
-- Log into the EC2 instance and start the airflow schduler.
+- Log into the EC2 instance and start the airflow scheduler.
 - Open airflow ui interface and turn on the cluster_dag. This job is scheduled to run once a month.
 - Once airflow workflow is complete. The data lake is available on the S3 bucket.
+
 

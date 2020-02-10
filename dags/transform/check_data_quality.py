@@ -1,7 +1,7 @@
 s3 = "s3a://shwes3udacapstone/"
 IMMIGRATION="data/processed/immigration/"
 IMMIGRANT="data/processed/immigrant/"
-IMMIGRANT_CITY="data/processed/immigration_demo_weather/"
+IMMIGRANT_CITY="data/processed/immigration_demographics/"
 
 spark.sparkContext.setLogLevel("WARN")
 
@@ -20,4 +20,4 @@ def check(path, table):
 
 check(s3+IMMIGRATION,"immigration")
 check(s3+IMMIGRANT,"immigrant")
-check(s3+IMMIGRANT_CITY,"immigration_demo_weather")
+check(s3+IMMIGRANT_CITY,"immigration_demographics")
